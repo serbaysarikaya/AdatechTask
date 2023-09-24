@@ -1,0 +1,148 @@
+﻿@model AdatechTask.Entities.Dtos.BookListDto
+@using AdatechTask.Shared.Utilities.Results.ComplexTypes
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Kitap Index";
+}
+<ol class="breadcrumb mb-3 mt-2">
+    <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">@_localization.Getkey("Admin2").Value</a></li>
+    <li class="breadcrumb-item active"><a asp-area="Admin" asp-controller="Book" asp-action="Index">@_localization.Getkey("Book").Value</a></li>
+</ol>
+@if (Model.ResultStatus == ResultStatus.Success)
+{
+    <div id="modalPlaceHolder" aria-hidden="true"></div>
+    <div class="card mb-4 mt-2">
+        <div class="card-header">
+            <i class="fas fa-table mr-1"></i>
+            @_localization.Getkey("Categories").Value
+        </div>
+
+
+        <div class="card-body">
+            <div class="spinner-border" role="status" style="display: none;">
+                <span class="sr-only">Yükleniyor...</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="booksTable" width="100%" cellspacing="0">
+                    <thead>
+                        @*
+                    ID
+                    BookName
+                    Writer
+                    PublicationDate
+                    ISBN
+                    BookCategory
+                    NumberPages
+                    Publisher
+                    IsActive
+                    IsDeleted
+                    RegistrationDate
+                    RegisteredUser
+                    EditedDate
+                    EditedUser
+                    
+                        *@
+                        <tr>
+                            <th>@_localization.Getkey("Transactions").Value</th>
+                            <th>@_localization.Getkey("ID").Value</th>
+                            <th>@_localization.Getkey("BookName").Value</th>
+                            <th>@_localization.Getkey("Writer").Value</th>
+                            <th>@_localization.Getkey("PublicationDate").Value</th>
+                            <th>@_localization.Getkey("ISBN").Value</th>
+                            <th>@_localization.Getkey("BookCategory").Value</th>
+                            <th>@_localization.Getkey("Publisher").Value</th>
+                            <th>@_localization.Getkey("IsActive").Value</th>
+                            <th>@_localization.Getkey("IsDeleted").Value</th>
+                            <th>@_localization.Getkey("RegistrationDate").Value</th>
+                            <th>@_localization.Getkey("RegisteredUser").Value</th>
+                            <th>@_localization.Getkey("RegisteredUser").Value</th>
+                            <th>@_localization.Getkey("EditedDate").Value</th>
+                            <th>@_localization.Getkey("EditedUser").Value</th>
+
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>@_localization.Getkey("Transactions").Value</th>
+                            <th>@_localization.Getkey("ID").Value</th>
+                            <th>@_localization.Getkey("BookName").Value</th>
+                            <th>@_localization.Getkey("Writer").Value</th>
+                            <th>@_localization.Getkey("PublicationDate").Value</th>
+                            <th>@_localization.Getkey("ISBN").Value</th>
+                            <th>@_localization.Getkey("BookCategory").Value</th>
+                            <th>@_localization.Getkey("Publisher").Value</th>
+                            <th>@_localization.Getkey("IsActive").Value</th>
+                            <th>@_localization.Getkey("IsDeleted").Value</th>
+                            <th>@_localization.Getkey("RegistrationDate").Value</th>
+                            <th>@_localization.Getkey("RegisteredUser").Value</th>
+                            <th>@_localization.Getkey("RegisteredUser").Value</th>
+                            <th>@_localization.Getkey("EditedDate").Value</th>
+                            <th>@_localization.Getkey("EditedUser").Value</th>
+
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach (var book in Model.Books)
+                        {
+                            <tr name="@book.Id">
+                                <td>
+                                    <button class="btn btn-primary btn-sm btn-update" data-id="@book.Id"><span class="fas fa-edit"></span></button>
+                                    <button class="btn btn-danger btn-sm btn-delete" data-id="@book.Id"><span class="fas fa-minus-circle"></span></button>
+                                </td>
+                                <td>@book.Id</td>
+                                <td>@book.Title</td>
+                                <td>@book.Author</td>
+                                <td>@book.PublicationDate.ToShortDateString()</td>
+                                <td>@book.ISBN</td>
+                                <td>@book.Category</td>
+                                <td>@book.PageCount</td>
+                                <td>@book.Publisher</td>
+                                <td>@(book.IsActive ? "Evet" : "Hayır")</td>
+                                <td>@(book.IsDeleted ? "Evet" : "Hayır")</td>
+                                <td>@book.CreatedDate.ToShortDateString()</td>
+                                <td>@book.CreatedByName</td>
+                                <td>@book.ModifiedDate.ToShortDateString()</td>
+                                <td>@book.ModifiedByName</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+<button class="btn btn-success" id="csvDownloadButton">@_localization.Getkey("CSV").Value</button>
+@if (Model.ResultStatus == ResultStatus.Error)
+{
+    <div class="alert alert-danger mt-3">
+        @Model.Message <br />
+        Dashboard sayfasına geri dönmek için lütfen <a class="alert-link" asp-area="Admin" asp-controller="Home" asp-action="Index">tıklayınız.</a>
+    </div>
+}
+@section Scripts
+    {
+    <script src="~/js/bookIndex.js" type="application/ecmascript"></script>
+    <script>
+        // CSV İndirme Butonu'na tıklama işlemi
+        document.getElementById('csvDownloadButton').addEventListener('click', function () {
+            // CSV verilerini almak için bir AJAX isteği gönder
+            fetch('/Admin/Book/DownloadCsv')
+                .then(response => response.blob())
+                .then(data => {
+                    // Blob verisi alındığında CSV dosyasını indir
+                    const url = window.URL.createObjectURL(data);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'kitaplar.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('CSV indirme hatası:', error);
+                });
+        });
+    </script>
+}
